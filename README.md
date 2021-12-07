@@ -4,3 +4,5 @@ NB: Please download R-inla package zipped file from the link :https://inla.r-inl
 Place in the same folder with the shiny App
 
 You can test dashboard I using the demo data  and shapefiles included in this repository under the folder Demo_data
+
+After running dashboard I, you can test dashboard II using the 'Demo.Data.Prospective.csv' file also under the Demo_data folder
