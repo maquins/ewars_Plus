@@ -79,7 +79,7 @@ library(data.table)
 library(reportROC)
 library(promises)
 library(future)
-plan(multisession)
+plan(multisession,workers=2)
 
 
 #if (!getDoParRegistered()){

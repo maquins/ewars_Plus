@@ -14,7 +14,7 @@ observeEvent(c(input$population_New_model,
                
 ##load INLA
                
-               #paste0(getwd(),'/',"INLA_20.03.17.tar.gz")
+               paste0(getwd(),'/',"INLA_20.03.17.tar.gz")
                if(!dir.exists(paste0(getwd(),"/INLA"))){
                  untar("INLA_20.03.17.tar.gz")
                  
@@ -267,7 +267,7 @@ if(is.null(input$new_model_Year_validation)){
 }
 
 ## run weekly cross validation for the predicted year
-time_52<-system.time({
+time_52<<-system.time({
   pred_vals_all_promise<<-future_promise({
     pkgload::load_all(paste0(getwd(),"/INLA"))
     
@@ -571,7 +571,7 @@ observeEvent(c(input$new_model_Year_plot,
                                      reverse=F)                   
                  plo1<-leaflet(week_slice[,yr_week]) %>% 
                    addTiles() %>% 
-                   addProviderTiles(providers$OpenStreetMap) %>% 
+                  # addProviderTiles(providers$OpenStreetMap) %>% 
                    fitBounds(lng1,lat1,lng2,lat2) %>% 
                    #addPolylines() %>% 
                    addPolygons(fillColor = eval(parse(text=paste0("~pal(`",yr_week,"`)"))),
@@ -679,7 +679,7 @@ observeEvent(c(input$new_model_Year_plot,
                    
                    leaflet(week_slice[,yr_week]) %>% 
                      addTiles() %>% 
-                     addProviderTiles(providers$OpenStreetMap) %>% 
+                     #addProviderTiles(providers$OpenStreetMap) %>% 
                      fitBounds(lng1,lat1,lng2,lat2) %>% 
                      #addPolylines() %>% 
                      addPolygons(fillColor = eval(parse(text=paste0("~pal(`",yr_week,"`)"))),
@@ -1100,7 +1100,7 @@ observeEvent(c(input$district_validation,
     
   
   pred_vals_all<-.
-  saveRDS(pred_vals_all,"pred_eval.rds") 
+  #saveRDS(pred_vals_all,"pred_eval.rds") 
   data_use<-pred_vals_all %>% 
     dplyr::filter(district==district_validation) %>% 
     dplyr::select(district,year,week,mu_mean,size_mean,observed,predicted,
@@ -1125,11 +1125,9 @@ observeEvent(c(input$district_validation,
   print(probs)
   idx.comp<<-which(!is.na(data_use_$outbreak))
   
-  reportROC(gold=as.numeric(data_use_$outbreak)[idx.comp],
-            predictor=probs[idx.comp])
   
-  roc_reporta<-reportROC(gold=as.numeric(data_use_$outbreak)[idx.comp],
-                        predictor=probs[idx.comp])
+  roc_try<-try(reportROC(gold=as.numeric(data_use_$outbreak)[idx.comp],
+                         predictor=probs[idx.comp]),outFile =warning("please.."))
   
   roc_tab_names<-c("Cutoff","AUC","AUC.SE","AUC.low","AUC.up","P","ACC",
                    "ACC.low","ACC.up","SEN","SEN.low","SEN.up",
@@ -1140,10 +1138,11 @@ observeEvent(c(input$district_validation,
   kdd<-data.frame(t(rep(as.character(NA),length(roc_tab_names))))
   names(kdd)<-roc_tab_names
   
-  if(is.null(roc_reporta)){
+  if(class(roc_try) %in% c("NULL","try-error")){
     roc_report<-kdd
   }else{
-    roc_report<-roc_reporta
+    roc_report<-reportROC(gold=as.numeric(data_use_$outbreak)[idx.comp],
+                          predictor=probs[idx.comp])
   }
   
   if(roc_report$Cutoff%in% c(NA,-Inf,NaN,Inf)){
